@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+      * { box-sizing: border-box; }
+      body { width: 50%; margin: 1rem auto; font-family: sans-serif; }
+      #result { border: 1px solid #ccc; padding: 10px; font-family: monospace; }
+      @keyframes yellowfade { from { background: #ffa; } to { background: transparent; } }
+      #result pre { animation: yellowfade 1s; padding: 5px; margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+    <% if (!loggedIn) { %>
+      <button onclick="location.href = '/login'">login</button>
+    <% } else { %>
+        <button onclick="location.href = '/logout'">logout</button>
+        <button onclick="request(3000, '/.well-known/bff-sessioninfo')">Get User</button>
+        <button onclick="request(3001, '/api', true)">Request API</button>
+        <button onclick="request(3001, '/api', true, 'foobar')">Request API (wrong audience)</button>
+    <% } %>
+    <h3>Log:</h3>
+    <div id="result"></div>
+</div>
+<script></script>
+<script>
+  const result = document.querySelector('#result');
+
+  const log = (msg) => {
+    const item = document.createElement('pre');
+    item.innerText = `${new Date().toLocaleTimeString()} ${msg}`;
+    result.prepend(item);
+  };
+
+  let accessToken;
+  let expiresAt;
+
+  const getAccessToken = async (resource) => {
+    if (!resource && accessToken && (expiresAt > Date.now())) {
+      return accessToken;
+    }
+    const { access_token, expires_in } = await request(3000, `/.well-known/bff-token${resource && '?resource=' + resource || ''}`);
+    accessToken = access_token;
+    expiresAt = Date.now() + (expires_in * 1000);
+    return accessToken;
+  }
+
+  const request = async (port, path, requiresAt, resource) => {
+    const response = await fetch(`http://localhost:${port}${path}`, requiresAt && {
+      headers: {
+        authorization: `Bearer ${await getAccessToken(resource)}`,
+      },
+    });
+    const json = await response.json();
+    log(`${response.status} ${path} ${JSON.stringify(json, null, 2)}`);
+    return json;
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "bff-poc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx nodemon index.js"
+  },
+  "keywords": [],
+  "author": "adamjmcgrath",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^9.0.2",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "express-oauth2-bearer": "^0.4.1",
+    "express-openid-connect": "^2.4.0"
+  }
+}
